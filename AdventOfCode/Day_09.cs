@@ -118,9 +118,8 @@ namespace AdventOfCode
 
             List<int> basinSizes = basins.Select(b => b.Value.Distinct().Count()).ToList();
 
-            List<int> orderByDescending = basinSizes
-                .OrderByDescending(bs => bs).ToList();
-            long result = orderByDescending
+            long result = basinSizes
+                .OrderByDescending(bs => bs)
                 .Take(3)
                 .Aggregate<int, long>(
                     1L,
