@@ -144,34 +144,28 @@ namespace AdventOfCode
             };
             _arrayIndicesToExclude.Add(currentArrayIndex);
 
-            List<ArrayIndex> arrayIndices = new List<ArrayIndex>();
             if (rowIdx > 0
                 && !_arrayIndicesToExclude.Exists(a => a.RowIdx == rowIdx - 1 && a.ColIdx == colIdx))
             {
-                arrayIndices.Add(new ArrayIndex(rowIdx - 1, colIdx));
+                basin.AddRange(CalculateBasin(new ArrayIndex(rowIdx - 1, colIdx)));
             }
 
             if (rowIdx < _input.Length - 1
                 && !_arrayIndicesToExclude.Exists(a => a.RowIdx == rowIdx + 1 && a.ColIdx == colIdx))
             {
-                arrayIndices.Add(new ArrayIndex(rowIdx + 1, colIdx));
+                basin.AddRange(CalculateBasin(new ArrayIndex(rowIdx + 1, colIdx)));
             }
 
             if (colIdx > 0
                 && !_arrayIndicesToExclude.Exists(a => a.RowIdx == rowIdx && a.ColIdx == colIdx - 1))
             {
-                arrayIndices.Add(new ArrayIndex(rowIdx, colIdx - 1));
+                basin.AddRange(CalculateBasin(new ArrayIndex(rowIdx, colIdx - 1)));
             }
 
             if (colIdx < _input[rowIdx].Length - 1
                 && !_arrayIndicesToExclude.Exists(a => a.RowIdx == rowIdx && a.ColIdx == colIdx + 1))
             {
-                arrayIndices.Add(new ArrayIndex(rowIdx, colIdx + 1));
-            }
-
-            foreach (ArrayIndex arrayIndex in arrayIndices)
-            {
-                basin.AddRange(CalculateBasin(arrayIndex));
+                basin.AddRange(CalculateBasin(new ArrayIndex(rowIdx, colIdx + 1)));
             }
 
             return basin;
