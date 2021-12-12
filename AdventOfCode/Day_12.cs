@@ -96,16 +96,13 @@ namespace AdventOfCode
 
         public override ValueTask<string> Solve_2()
         {
-            List<List<string>> possiblePaths = new List<List<string>>();
+            int nbrPaths = 0;
 
-            void DiscoverPossiblePaths(string s, List<string> existingPath, int depth = 0)
+            void DiscoverPossiblePaths(string s, Dictionary<string, int> smallCavesCount, int depth = 0)
             {
-                // Console.WriteLine($"{string.Join("", Enumerable.Repeat(" ", depth))} " +
-                //                   $"Discover possible paths for {s} with existing path {string.Join("-", existingPath)}");
                 if (string.Equals(s, END))
                 {
-                    existingPath.Add(s);
-                    possiblePaths.Add(existingPath);
+                    nbrPaths++;
                     return;
                 }
 
@@ -117,33 +114,30 @@ namespace AdventOfCode
 
                 if (SmallCave(s))
                 {
-                    Dictionary<string,int> dictionary = existingPath
-                        .Where(SmallCave)
-                        .Distinct()
-                        .ToDictionary(ep => ep, ep => existingPath.Count(x => string.Equals(ep, x)));
-
-                    if (dictionary.ContainsKey(s) && dictionary.Any(d => d.Value > 1))
+                    if (!smallCavesCount.ContainsKey(s))
                     {
-                        return;
+                        smallCavesCount.Add(s, 1);
+                    }
+                    else
+                    {
+                        if (smallCavesCount.Any(d => d.Value == 2))
+                        {
+                            return;
+                        }
+
+                        smallCavesCount[s] += 1;
                     }
                 }
 
-                existingPath.Add(s);
                 foreach (string possibility in possibilities)
                 {
-                    List<string> tempPath = new List<string>(existingPath);
-                    DiscoverPossiblePaths(possibility, tempPath, depth+1);
+                    DiscoverPossiblePaths(possibility, new Dictionary<string, int>(smallCavesCount), depth+1);
                 }
             }
 
             DiscoverPossiblePaths(START, new());
 
-            // foreach (List<string> possiblePath in possiblePaths)
-            // {
-            //     Console.WriteLine(string.Join("-", possiblePath));
-            // }
-
-            return new ValueTask<string>($"Nbr of distinct possible paths: {possiblePaths.Count}");
+            return new ValueTask<string>($"Nbr of distinct possible paths: {nbrPaths}");
         }
 
         private static bool SmallCave(string s) => !String.Equals(s, START) && !string.Equals(s, END) && s.All(char.IsLower);
