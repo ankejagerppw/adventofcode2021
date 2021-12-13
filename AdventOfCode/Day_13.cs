@@ -13,7 +13,7 @@ namespace AdventOfCode
         private const string Horizontal = "HORIZONTAL";
         private const string Vertical = "VERTICAL";
 
-        private readonly bool[][] _dots;
+        private readonly bool[,] _dots;
         private readonly List<(string fold, int coordinate)> _folds;
 
         public Day_13()
@@ -34,15 +34,11 @@ namespace AdventOfCode
                 .ToList();
             int maxRow = dots.Max(d => d.row);
             int maxCol = dots.Max(d => d.col);
-            _dots = new bool[maxRow + 1][];
-            for (int i = 0; i < _dots.Length; i++)
-            {
-                _dots[i] = new bool[maxCol + 1];
-            }
+            _dots = new bool[maxRow + 1, maxCol + 1];
 
             foreach (var dot in dots)
             {
-                _dots[dot.row][dot.col] = true;
+                _dots[dot.row, dot.col] = true;
             }
 
             Regex regexFolds = new Regex("fold along (?<foldtype>x|y)=(?<lineNbr>\\d+)");
@@ -67,21 +63,20 @@ namespace AdventOfCode
         {
             // only first fold
             (string foldType, int lineNbr) fold = _folds.First();
-            bool[][] afterFold = DoFold(fold, _dots);
-            int count = afterFold.SelectMany(af => af)
-                .Count(af => af);
+            bool[,] afterFold = DoFold(fold, _dots);
+            int count = afterFold.Cast<bool>().Count(af => af);
 
             return new ValueTask<string>($"{count}");
         }
 
         public override ValueTask<string> Solve_2()
         {
-            bool[][] afterFold = _folds.Aggregate(_dots, (current, fold) => DoFold(fold, current));
-            foreach (bool[] row in afterFold)
+            bool[,] afterFold = _folds.Aggregate(_dots, (current, fold) => DoFold(fold, current));
+            for (int rowIdx = 0; rowIdx < afterFold.GetLength(0); rowIdx++)
             {
-                foreach (bool b in row)
+                for (int colIdx = 0; colIdx < afterFold.GetLength(1); colIdx++)
                 {
-                    Console.Write($"{(b ? "#" : ".")}");
+                    Console.Write($"{(afterFold[rowIdx, colIdx] ? "#" : ".")}");
                 }
 
                 Console.WriteLine();
@@ -90,46 +85,46 @@ namespace AdventOfCode
             return new ValueTask<string>("See what nice string is printed");
         }
 
-        private static bool[][] DoFold((string foldType, int lineNbr) fold, bool[][] currentDots)
+        private static bool[,] DoFold((string foldType, int lineNbr) fold, bool[,] currentDots)
         {
-            bool[][] result;
+            bool[,] result;
+            int currentNbrRows = currentDots.GetLength(0);
+            int currentNbrCols = currentDots.GetLength(1);
             if (fold.foldType == Vertical)
             {
-                result = new bool[currentDots.Length][];
-                int nbrCols = Math.Max(fold.lineNbr, currentDots[0].Length - fold.lineNbr - 1);
-                for (int rowIdx = 0; rowIdx < currentDots.Length; rowIdx++)
+                int nbrCols = Math.Max(fold.lineNbr, currentNbrCols - fold.lineNbr - 1);
+                result = new bool[currentNbrRows, nbrCols];
+                for (int rowIdx = 0; rowIdx < currentNbrRows; rowIdx++)
                 {
-                    result[rowIdx] = new bool[nbrCols];
                     for (int colOffset = 1;
-                        fold.lineNbr - colOffset >= 0 || fold.lineNbr + colOffset < currentDots[rowIdx].Length;
+                        fold.lineNbr - colOffset >= 0 || fold.lineNbr + colOffset < currentNbrCols;
                         colOffset++)
                     {
                         int minColIdx = fold.lineNbr - colOffset;
                         int maxColIdx = fold.lineNbr + colOffset;
-                        bool b = minColIdx >= 0 && currentDots[rowIdx][minColIdx];
-                        b |= maxColIdx < currentDots[rowIdx].Length && currentDots[rowIdx][maxColIdx];
+                        bool b = minColIdx >= 0 && currentDots[rowIdx, minColIdx];
+                        b |= maxColIdx < currentNbrCols && currentDots[rowIdx, maxColIdx];
 
-                        result[rowIdx][minColIdx] = b;
+                        result[rowIdx, minColIdx] = b;
                     }
                 }
             }
             else
             {
-                int nbrRows = Math.Max(fold.lineNbr, currentDots.Length - fold.lineNbr - 1);
-                result = new bool[nbrRows][];
+                int nbrRows = Math.Max(fold.lineNbr, currentNbrRows - fold.lineNbr - 1);
+                result = new bool[nbrRows, currentNbrCols];
                 for (int rowOffset = 1;
-                    fold.lineNbr - rowOffset >= 0 || fold.lineNbr + rowOffset < currentDots.Length;
+                    fold.lineNbr - rowOffset >= 0 || fold.lineNbr + rowOffset < currentNbrRows;
                     rowOffset++)
                 {
-                    result[fold.lineNbr - rowOffset] = new bool[currentDots[0].Length];
-                    for (int colIdx = 0; colIdx < currentDots[0].Length; colIdx++)
+                    for (int colIdx = 0; colIdx < currentNbrCols; colIdx++)
                     {
                         int minRowIdx = fold.lineNbr - rowOffset;
                         int maxRowIdx = fold.lineNbr + rowOffset;
-                        bool b = minRowIdx >= 0 && currentDots[minRowIdx][colIdx];
-                        b |= maxRowIdx < currentDots.Length && currentDots[maxRowIdx][colIdx];
+                        bool b = minRowIdx >= 0 && currentDots[minRowIdx, colIdx];
+                        b |= maxRowIdx < currentNbrRows && currentDots[maxRowIdx, colIdx];
 
-                        result[minRowIdx][colIdx] = b;
+                        result[minRowIdx, colIdx] = b;
                     }
                 }
             }
