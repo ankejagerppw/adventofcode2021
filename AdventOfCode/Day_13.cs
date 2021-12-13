@@ -81,7 +81,7 @@ namespace AdventOfCode
             {
                 foreach (bool b in row)
                 {
-                    Console.Write($"{(b ? "#" : " ")}");
+                    Console.Write($"{(b ? "#" : ".")}");
                 }
 
                 Console.WriteLine();
@@ -96,9 +96,10 @@ namespace AdventOfCode
             if (fold.foldType == Vertical)
             {
                 result = new bool[currentDots.Length][];
+                int nbrCols = Math.Max(fold.lineNbr, currentDots[0].Length - fold.lineNbr - 1);
                 for (int rowIdx = 0; rowIdx < currentDots.Length; rowIdx++)
                 {
-                    result[rowIdx] = new bool[fold.lineNbr];
+                    result[rowIdx] = new bool[nbrCols];
                     for (int colOffset = 1;
                         fold.lineNbr - colOffset >= 0 || fold.lineNbr + colOffset < currentDots[rowIdx].Length;
                         colOffset++)
@@ -114,7 +115,8 @@ namespace AdventOfCode
             }
             else
             {
-                result = new bool[fold.lineNbr][];
+                int nbrRows = Math.Max(fold.lineNbr, currentDots.Length - fold.lineNbr - 1);
+                result = new bool[nbrRows][];
                 for (int rowOffset = 1;
                     fold.lineNbr - rowOffset >= 0 || fold.lineNbr + rowOffset < currentDots.Length;
                     rowOffset++)
