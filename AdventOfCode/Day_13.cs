@@ -71,35 +71,30 @@ namespace AdventOfCode
 
         private static HashSet<(int row, int col)> DoFold((string foldType, int lineNbr) fold, HashSet<(int row, int col)> currentDots)
         {
-            HashSet<(int row, int col)> result = new HashSet<(int row, int col)>();
-
+            HashSet<(int row, int col)> result;
             if (fold.foldType == Vertical)
             {
-                foreach ((int row, int col) dot in currentDots)
-                {
-                    if (dot.col < fold.lineNbr)
-                    {
-                        result.Add(dot);
-                    }
-                    else if (dot.col > fold.lineNbr)
-                    {
-                        result.Add((dot.row, fold.lineNbr - (dot.col - fold.lineNbr)));
-                    }
-                }
+                // calculate shift as the fold line might be before the middle
+                int shiftNbrCols = fold.lineNbr - (currentDots.Max(d => d.col) - fold.lineNbr);
+                shiftNbrCols = shiftNbrCols < 0 ? Math.Abs(shiftNbrCols) : 0;
+                result = currentDots
+                    .Where(d => d.col != fold.lineNbr)
+                    .Select(d =>
+                        (d.row,
+                        shiftNbrCols + (d.col < fold.lineNbr ? d.col : fold.lineNbr - (d.col - fold.lineNbr))))
+                    .ToHashSet();
             }
             else
             {
-                foreach ((int row, int col) dot in currentDots)
-                {
-                    if (dot.row < fold.lineNbr)
-                    {
-                        result.Add(dot);
-                    }
-                    else if (dot.row > fold.lineNbr)
-                    {
-                        result.Add((fold.lineNbr - (dot.row - fold.lineNbr), dot.col));
-                    }
-                }
+                // calculate shift as the fold line might be before the middle
+                int shiftNbrRows = fold.lineNbr - (currentDots.Max(d => d.row) - fold.lineNbr);
+                shiftNbrRows = shiftNbrRows < 0 ? Math.Abs(shiftNbrRows) : 0;
+                result = currentDots
+                    .Where(d => d.row != fold.lineNbr)
+                    .Select(d =>
+                        (shiftNbrRows + (d.row < fold.lineNbr ? d.row : fold.lineNbr - (d.row - fold.lineNbr)),
+                            d.col))
+                    .ToHashSet();
             }
 
             return result;
