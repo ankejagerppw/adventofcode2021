@@ -76,6 +76,7 @@ public class Day_15 : BaseDay
         // all risks starting from startingPos
         Dictionary<(int row, int col), long> calculatedRisks = new Dictionary<(int row, int col), long> { { startingPos, 0 } };
         queue.Enqueue(startingPos);
+        (int, int) endingPos = (risks.GetLength(0) - 1, risks.GetLength(1) - 1);
 
         while (queue.TryDequeue(out (int row, int col) currentPos))
         {
@@ -92,7 +93,7 @@ public class Day_15 : BaseDay
                     continue;
                 }
 
-                if (!queue.Contains(adjacent))
+                if (!queue.Contains(adjacent) && adjacent != endingPos)
                 {
                     queue.Enqueue(adjacent);
                 }
