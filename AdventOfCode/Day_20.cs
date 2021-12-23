@@ -59,31 +59,41 @@ public class Day_20 : BaseDay
             }
         }
 
-        int PositionInEnhancementAlgorithm((int row, int col) pixel, bool isInfinite)
+        int PositionInEnhancementAlgorithm((int row, int col) pixel, bool pixelsOutsideBoundariesLit)
         {
             IEnumerable<(int row, int col)> surroundingPixels = SurroundingPixels(pixel);
             string binaryString = string.Empty;
             foreach ((int row, int col) px in surroundingPixels.OrderBy(sp => sp.row).ThenBy(sp => sp.col).ToList())
             {
                 bool insideBoundsOfImage = IsInsideBoundsOfImage(px.row, px.col);
-                binaryString += insideBoundsOfImage && enhancedImage.Contains(px) ? '1' : (!insideBoundsOfImage && isInfinite ? '1' : '0');
+                binaryString += insideBoundsOfImage && enhancedImage.Contains(px) || !insideBoundsOfImage && pixelsOutsideBoundariesLit ? '1' : '0';
             }
 
             return Convert.ToInt32(binaryString, 2);
         }
 
-        bool NewInfiniteState(bool isInfinite)
+        // Method to see whether the pixels outside the boundaries will be lit in this enhancement step or not
+        bool PixelsOutsideBoundariesLit(bool currentlyLit)
         {
-            // needed to determine what should be done when at borders (found this through trial and error)
             return _enhancementAlgorithm[0] switch
             {
+                // if the first char of the algorithm is '.', the pixels will always be unlit (9 bits always refer to position 0 in algorithm, which returns 0)
                 '.' => false,
-                '#' when _enhancementAlgorithm.Last() == '.' => !isInfinite,
+                /* if the first char of the algorithm is '#' and the last one is a '.', these pixels constantly switch between lit and unlit
+                 from one enhancement step to another.
+                 First step: 9 bits refer to position 0 => #, so they will all be lit.
+                 Second step: 9 bits refer to position 512 (last) => ., so they will all be unlit.
+                 */
+                '#' when _enhancementAlgorithm.Last() == '.' => !currentlyLit,
+                /* if the first char of the algorithm is '#' and the last one is '#',
+                 the pixels will always be lit (9 bits always refer to position 512 in algorithm, which returns #)
+                 (except for the first enhancement step)
+                 */
                 _ => true
             };
         }
 
-        bool isInfinite = false;
+        bool pxOutsideBoundariesLit = false;
         for (int enhancementTimes = 0; enhancementTimes < nbrOfEnhancements; enhancementTimes++)
         {
             HashSet<(int row, int col)> tempImage = new HashSet<(int row, int col)>();
@@ -91,7 +101,7 @@ public class Day_20 : BaseDay
             {
                 for (int colIdx = minCol - 1; colIdx <= maxCol + 1; colIdx++)
                 {
-                    if (_enhancementAlgorithm[PositionInEnhancementAlgorithm((rowIdx, colIdx), isInfinite)] == '#')
+                    if (_enhancementAlgorithm[PositionInEnhancementAlgorithm((rowIdx, colIdx), pxOutsideBoundariesLit)] == '#')
                     {
                         tempImage.Add((rowIdx, colIdx));
                     }
@@ -104,7 +114,7 @@ public class Day_20 : BaseDay
             minCol = enhancedImage.Min(p => p.col);
             maxCol = enhancedImage.Max(p => p.col);
 
-            isInfinite = NewInfiniteState(isInfinite);
+            pxOutsideBoundariesLit = PixelsOutsideBoundariesLit(pxOutsideBoundariesLit);
         }
 
         return enhancedImage;
