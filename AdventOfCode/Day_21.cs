@@ -17,7 +17,7 @@ public class Day_21 : BaseDay
         public Dictionary<int, int> Scores;
         public bool GameFinished;
         public int? PlayerIdToWin;
-        public long GameCount;
+        public long UniverseCount;
 
         public Game()
         {
@@ -25,7 +25,7 @@ public class Day_21 : BaseDay
             Scores = new Dictionary<int, int>();
             _playerIdToThrow = 1;
             GameFinished = false;
-            GameCount = 1L;
+            UniverseCount = 1L;
         }
 
         private void SwitchPlayer()
@@ -62,7 +62,7 @@ public class Day_21 : BaseDay
                 _playerIdToThrow = game._playerIdToThrow,
                 GameFinished = game.GameFinished,
                 PlayerIdToWin = game.PlayerIdToWin,
-                GameCount = game.GameCount
+                UniverseCount = game.UniverseCount
             };
         }
     }
@@ -148,11 +148,11 @@ public class Day_21 : BaseDay
             foreach (int throwSum in allPossibleSumsCount.Keys)
             {
                 Game g = Game.Copy(currentGame);
-                g.GameCount *= allPossibleSumsCount[throwSum];
+                g.UniverseCount *= allPossibleSumsCount[throwSum];
                 g.ThrowDie(throwSum);
                 if (g.GameFinished)
                 {
-                    playerWins[g.PlayerIdToWin.Value] += g.GameCount;
+                    playerWins[g.PlayerIdToWin.Value] += g.UniverseCount;
                 }
                 else
                 {
