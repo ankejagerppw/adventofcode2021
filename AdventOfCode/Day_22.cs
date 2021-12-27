@@ -252,6 +252,7 @@ public class Day_22 : BaseDay
                 {
                     foreach ((long zMin, long zMax) zPair in allPossibleZPairs)
                     {
+                        // if does not fall completely within intersection of cuboids, then add, otherwise ignore
                         if (!(xPair.xMin >= newCuboid.xMin && xPair.xMax <= newCuboid.xMax
                             && yPair.yMin >= newCuboid.yMin && yPair.yMax <= newCuboid.yMax
                             && zPair.zMin >= newCuboid.zMin && zPair.zMax <= newCuboid.zMax))
